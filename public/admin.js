@@ -2,7 +2,7 @@ const $=s=>document.querySelector(s);let products=[],orders=[],editing=null;cons
 async function api(path,opts={}){const r=await fetch(path,{credentials:'same-origin',...opts,headers:{'Content-Type':'application/json',...opts.headers}});const j=await r.json();if(!r.ok)throw Error(j.error||'Request failed');return j;}
 function tab(name){document.querySelectorAll('.panel').forEach(e=>e.classList.toggle('active',e.id===name));document.querySelectorAll('[data-tab]').forEach(e=>e.classList.toggle('active',e.dataset.tab===name));}
 document.querySelectorAll('[data-tab]').forEach(e=>e.onclick=()=>tab(e.dataset.tab));document.querySelectorAll('[data-go]').forEach(e=>e.onclick=()=>tab(e.dataset.go));
-async function login(){ $('#login').style.display='none';$('#dashboard').style.display='grid';await refresh();}
+async function login(){ $('#login').style.display='none';$('#dashboard').style.display='grid';await refresh();await loadEnquiries();}
 $('#loginform').onsubmit=async e=>{e.preventDefault();try{await api('/api/admin/login',{method:'POST',body:JSON.stringify(Object.fromEntries(new FormData(e.target)))});login();}catch(err){msg(err.message)}};
 $('#logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'});location.reload()};$('#reload').onclick=refresh;
 const node=(tag,text,cls)=>{const e=document.createElement(tag);if(text!==undefined)e.textContent=text;if(cls)e.className=cls;return e;};
@@ -17,4 +17,6 @@ function showBanner(){const v=$('#contentform').elements.heroImage.value;const i
 $('#contentform').elements.heroImage.oninput=showBanner;
 $('#bannerfile').onchange=async e=>{if(!e.target.files[0])return;try{msg('Uploading banner...');$('#contentform').elements.heroImage.value=await upload(e.target.files[0],'banners');showBanner();msg('Banner uploaded. Save content to publish.')}catch(e){msg(e.message)}};
 $('#contentform').onsubmit=async e=>{e.preventDefault();try{await api('/api/admin/content',{method:'PUT',body:JSON.stringify(Object.fromEntries(new FormData(e.target)))});msg('Homepage content saved in MongoDB.')}catch(e){msg(e.message)}};
+async function loadEnquiries(){const tbody=$('#enquirieslist');if(!tbody)return;tbody.replaceChildren();try{const enquiries=await api('/api/admin/contact');if(!enquiries.length){const tr=node('tr'),td=node('td','No enquiries received yet.');td.colSpan=5;tr.append(td);tbody.append(tr);return;}for(const e of enquiries){const tr=node('tr');for(const value of [e.createdAt?new Date(e.createdAt).toLocaleDateString('en-IN'):'—',e.name||'—',(e.email||'—')+(e.phone?' / '+e.phone:''),e.subject||'—',e.message||'—'])tr.append(node('td',String(value)));tbody.append(tr)}}catch(err){msg('Could not load enquiries: '+err.message)}}
+$('#reload-enquiries').onclick=loadEnquiries;
 api('/api/admin/me').then(login).catch(()=>{});
