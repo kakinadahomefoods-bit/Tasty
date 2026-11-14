@@ -1,6 +1,12 @@
 {
   "version": 2,
-  "buildCommand": "node -e \"console.log('Serving static storefront from public/')\"",
+  "buildCommand": "node -e \"console.log('Preparing Tasty Treasures storefront')\"",
   "outputDirectory": "public",
-  "cleanUrls": false
+  "cleanUrls": false,
+  "rewrites": [
+    {
+      "source": "/api/:path*",
+      "destination": "/api/index.js"
+    }
+  ]
 }
