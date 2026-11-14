@@ -1,0 +1,6 @@
+{
+  "version": 2,
+  "buildCommand": "node -e \"console.log('Serving static storefront from public/')\"",
+  "outputDirectory": "public",
+  "cleanUrls": false
+}
